@@ -42,7 +42,24 @@ export function WorksGrid({ initialWorks, hideFilters = false, className }: Work
     return (
         <div className="space-y-6">
             {/* フィルターUI */}
-            {/* ... */}
+            {!hideFilters && (
+                <div className="flex flex-wrap gap-3 pb-4">
+                    {filters.map((filter) => (
+                        <button
+                            key={filter}
+                            onClick={() => setActiveFilter(filter)}
+                            className={cn(
+                                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-300",
+                                activeFilter === filter
+                                    ? "bg-black text-white dark:bg-white dark:text-black shadow-md"
+                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-[#171717] dark:text-gray-400 dark:hover:bg-[#262626] dark:hover:text-gray-200"
+                            )}
+                        >
+                            {filter}
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {/* グリッド */}
             <motion.div

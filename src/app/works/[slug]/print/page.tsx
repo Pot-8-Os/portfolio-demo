@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getWorkBySlug, getWorks } from "@/lib/wordpress";
 import { notFound } from "next/navigation";
 import PrintButton from "./PrintButton";
+import WorkQRCode from "./WorkQRCode";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
@@ -165,15 +166,12 @@ export default async function PrintPage({
                                 <p className="text-sm text-gray-500 mb-1">Created by</p>
                                 <p className="text-2xl font-semibold tracking-tight text-gray-700">PORTFOLIO-DEMO</p>
                             </div>
-                            {work.suac?.url && (
-                                <div className="text-right">
-                                    <p className="text-xs text-gray-600 mb-1">{work.suac.url}</p>
-                                    {/* In a real app, generate QR Code here */}
-                                    <div className="w-16 h-16 bg-gray-900 ml-auto flex items-center justify-center text-white text-[10px]">
-                                        QR CODE
-                                    </div>
+                            <div className="text-right">
+                                {/* QR Code */}
+                                <div className="ml-auto bg-white p-1">
+                                    <WorkQRCode url={work.suac?.url || `https://pf-demo.proletari.art/works/${slug}`} />
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
