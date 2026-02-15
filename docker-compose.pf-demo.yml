@@ -1,0 +1,54 @@
+name: portfolio-demo
+services:
+  pf-demo:
+    container_name: portfolio-frontend-demo
+    build:
+      context: .
+      args:
+        WORDPRESS_API_URL: ${WORDPRESS_API_URL_DEMO}
+    extra_hosts:
+      - "${CMS_DOMAIN_DEMO}:${CMS_RESOLUTION_TARGET:-host-gateway}"
+      - "${CMS_DOMAIN_PROD}:${CMS_RESOLUTION_TARGET:-host-gateway}"
+    ports:
+      - "3002:3000"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - WORDPRESS_API_URL=${WORDPRESS_API_URL_DEMO}
+    depends_on:
+      - cms-demo
+
+  cms-demo:
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST_DEMO}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER_DEMO}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD_DEMO}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME_DEMO}
+    volumes:
+      - cms_demo_data:/var/www/html
+      - ./php.ini:/usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      - db-cms-demo
+
+  db-cms-demo:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE_DEMO}
+      MYSQL_USER: ${MYSQL_USER_DEMO}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD_DEMO}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD_DEMO}
+    volumes:
+      - db_cms_demo_data:/var/lib/mysql
+
+volumes:
+  cms_demo_data:
+    external: true
+    name: portfolio-frontend_cms_demo_data
+  db_cms_demo_data:
+    external: true
+    name: portfolio-frontend_db_cms_demo_data

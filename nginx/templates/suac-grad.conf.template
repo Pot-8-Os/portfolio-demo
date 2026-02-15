@@ -1,0 +1,41 @@
+server {
+    server_name ${EDITOR_APP_DOMAIN};
+
+    root /var/www/suac-editor;
+    index index.html;
+
+    # Gzip Compression
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    # --- Security: IP Allow OR Basic Auth ---
+    satisfy any;
+    allow ${ALLOW_IP_HOME};       # Home IP
+    allow ${ALLOW_IP_DOCKER};     # Docker Internal
+    allow ${ALLOW_IP_SCHOOL};     # School IP
+    deny all;
+    
+    auth_basic "SUAC Management";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ----------------------------------------
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${EDITOR_APP_DOMAIN}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/${EDITOR_APP_DOMAIN}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = ${EDITOR_APP_DOMAIN}) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+    listen 80;
+    server_name ${EDITOR_APP_DOMAIN};
+    return 404; # managed by Certbot
+}

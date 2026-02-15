@@ -1,0 +1,53 @@
+services:
+  # 本番用 WordPress (CMS)
+  cms:
+    image: wordpress:latest
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+    volumes:
+      - cms_data:/var/www/html
+      - ./php.ini:/usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      - db-cms
+
+  db-cms:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_cms_data:/var/lib/mysql
+
+  # 本番用 Next.js フロントエンド
+  pf:
+    build:
+      context: .
+      args:
+        WORDPRESS_API_URL: ${WORDPRESS_API_URL}
+    extra_hosts:
+      - "${CMS_DOMAIN_PROD}:${CMS_RESOLUTION_TARGET:-host-gateway}"
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - WORDPRESS_API_URL=${WORDPRESS_API_URL}
+    depends_on:
+      - cms
+
+volumes:
+  cms_data:
+    external: true
+    name: portfolio-frontend_cms_data
+  db_cms_data:
+    external: true
+    name: portfolio-frontend_db_cms_data

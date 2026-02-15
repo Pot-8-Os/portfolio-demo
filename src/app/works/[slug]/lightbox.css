@@ -1,0 +1,71 @@
+/**
+ * Lightbox Custom Styles
+ * yet-another-react-lightbox ライブラリのスタイル上書き
+ * 
+ * Design: Glassmorphism aesthetic with subtle transparency
+ * 
+ * NOTE: !important はライブラリ内部スタイルを上書きするために必要。
+ *       自プロジェクトのスタイルには !important を使わないこと。
+ */
+
+@layer components {
+
+    /* Glassmorphism toolbar */
+    .yarl__toolbar {
+        background: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(20px) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding: 12px 16px !important;
+    }
+
+    /* Subtle, transparent navigation buttons */
+    .yarl__navigation_prev,
+    .yarl__navigation_next {
+        background: rgba(255, 255, 255, 0.12) !important;
+        backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 12px !important;
+        opacity: 0.7 !important;
+        transition: opacity 0.2s ease-out, background-color 0.2s ease-out, transform 0.1s ease-out !important;
+    }
+
+    .yarl__navigation_prev:hover,
+    .yarl__navigation_next:hover {
+        background: rgba(255, 255, 255, 0.18) !important;
+        opacity: 0.95 !important;
+    }
+
+    .yarl__navigation_prev:active,
+    .yarl__navigation_next:active {
+        opacity: 1 !important;
+        transform: translateY(-50%) scale(0.95) !important;
+    }
+
+    /* Toolbar buttons */
+    .yarl__button {
+        background: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        transition: opacity 0.2s ease-out, background-color 0.2s ease-out !important;
+    }
+
+    .yarl__button:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .yarl__button:active {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* Counter styling */
+    .yarl__slide_counter {
+        background: rgba(0, 0, 0, 0.4) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 8px 16px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.05em !important;
+    }
+}

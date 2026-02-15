@@ -1,0 +1,228 @@
+# CMS (Production)
+server {
+    server_name ${CMS_DOMAIN_PROD};
+
+    # Upload Limit
+    client_max_body_size 50M;
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${PF_DOMAIN_PROD}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/${PF_DOMAIN_PROD}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # --- Security Settings (Global) ---
+    satisfy any;
+    allow 127.0.0.1;
+    allow ${ALLOW_IP_VPS};
+    allow ${ALLOW_IP_HOME};
+    # allow ${ALLOW_IP_SCHOOL}; # Future Use
+    allow ${ALLOW_IP_DOCKER};   # Docker Internal Access
+    deny all;
+    auth_basic "Portfolio CMS Prod";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ----------------------------------
+
+    # Images/Media (Public Access for Next.js Image Optimizer)
+    location /wp-content/uploads/ {
+        allow all;
+        auth_basic off;
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # REST API (Public Access)
+    location /wp-json/ {
+        allow all;
+        auth_basic off;
+        
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Admin / API
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# CMS (Demo)
+server {
+    server_name ${CMS_DOMAIN_DEMO};
+
+    # Upload Limit
+    client_max_body_size 50M;
+
+    # SSL Config
+    listen 443 ssl;
+    # Note: Cert path might need variable if consistent scheme is used, relying on existing paths for now
+    ssl_certificate /etc/letsencrypt/live/cms.proletari.art-0002/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/cms.proletari.art-0002/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # --- Security Settings (Global) ---
+    satisfy any;
+    allow 127.0.0.1;
+    allow ${ALLOW_IP_VPS};
+    allow ${ALLOW_IP_HOME};
+    # allow ${ALLOW_IP_SCHOOL};
+    allow ${ALLOW_IP_DOCKER};
+    deny all;
+    auth_basic "Portfolio CMS Demo";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ----------------------------------
+
+    # Images/Media
+    location /wp-content/uploads/ {
+        allow all;
+        auth_basic off;
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # REST API
+    location /wp-json/ {
+        allow all;
+        auth_basic off;
+        
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Frontend - Production
+server {
+    server_name ${PF_DOMAIN_PROD};
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${PF_DOMAIN_PROD}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/${PF_DOMAIN_PROD}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # --- Security Settings (Global) ---
+    satisfy any;
+    allow ${ALLOW_IP_HOME};
+    # allow ${ALLOW_IP_SCHOOL};
+    allow ${ALLOW_IP_DOCKER};
+    deny all;
+    auth_basic "Portfolio Prod";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ----------------------------------
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Frontend - Demo
+server {
+    server_name ${PF_DOMAIN_DEMO};
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${PF_DOMAIN_PROD}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/${PF_DOMAIN_PROD}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # --- Security Settings (Global) ---
+    satisfy any;
+    allow ${ALLOW_IP_HOME};
+    # allow ${ALLOW_IP_SCHOOL};
+    allow ${ALLOW_IP_DOCKER};
+    deny all;
+    auth_basic "Portfolio Demo";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ----------------------------------
+
+    location / {
+        proxy_pass http://localhost:3002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Redirects
+server {
+    if ($host = ${PF_DOMAIN_DEMO}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${PF_DOMAIN_PROD}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${CMS_DOMAIN_DEMO}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${CMS_DOMAIN_PROD}) {
+        return 301 https://$host$request_uri;
+    }
+    server_name ${PROD_ROOT_DOMAIN} www.${PROD_ROOT_DOMAIN} ${CMS_DOMAIN_PROD} ${CMS_DOMAIN_DEMO} ${PF_DOMAIN_PROD} ${PF_DOMAIN_DEMO};
+    return 301 https://$host$request_uri;
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${PF_DOMAIN_PROD}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${PF_DOMAIN_PROD}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    if ($host = www.${PROD_ROOT_DOMAIN}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${PROD_ROOT_DOMAIN}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${CMS_DOMAIN_PROD}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${PF_DOMAIN_DEMO}) {
+        return 301 https://$host$request_uri;
+    }
+    if ($host = ${PF_DOMAIN_PROD}) {
+        return 301 https://$host$request_uri;
+    }
+
+    listen 80;
+    server_name ${PROD_ROOT_DOMAIN} www.${PROD_ROOT_DOMAIN} ${CMS_DOMAIN_PROD} ${CMS_DOMAIN_DEMO} ${PF_DOMAIN_PROD} ${PF_DOMAIN_DEMO};
+    return 404; 
+}
